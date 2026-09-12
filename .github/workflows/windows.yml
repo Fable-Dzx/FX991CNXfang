@@ -1,0 +1,33 @@
+name: Build FX-991CN X Windows
+
+on:
+  push:
+    branches: [ windows ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build portable exe
+        run: npx electron-builder --win portable
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: FX991CNX-Windows
+          path: dist/FX991CNX-Windows.exe
+          if-no-files-found: error

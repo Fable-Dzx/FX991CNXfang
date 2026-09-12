@@ -1,0 +1,40 @@
+{
+  "name": "fx991cnx-windows",
+  "version": "1.0.0",
+  "description": "FX-991CN X Online Scientific Calculator - Windows desktop app",
+  "main": "main.js",
+  "author": "Fable-Dzx",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.fx991cnx.fang",
+    "productName": "FX-991CN X",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "portable": {
+      "artifactName": "FX991CNX-Windows.exe"
+    }
+  }
+}
