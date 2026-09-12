@@ -26,26 +26,31 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Debug list assets
-        run: |
-          echo "=== assets root ==="
-          ls -la app/src/main/assets/
-          echo "=== all asset files ==="
-          find app/src/main/assets -type f | sort
-          echo "=== count ==="
-          find app/src/main/assets -type f | wc -l
-
       - name: Build debug APK
         run: gradle :app:assembleDebug --no-daemon --stacktrace --rerun-tasks
 
-      - name: List built APK contents
+      - name: Rename APK
         run: |
-          echo "=== APK contents ==="
-          unzip -l app/build/outputs/apk/debug/app-debug.apk
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/FX991CNX.apk
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FX991CNXfang-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: FX991CNX-apk
+          path: app/build/outputs/apk/debug/FX991CNX.apk
           if-no-files-found: error
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v1.0.${{ github.run_number }}
+          name: FX-991CN X Android v1.0.${{ github.run_number }}
+          body: |
+            自动构建版（来自 commit ${{ github.sha }}）
+
+            - 网页源码：https://github.com/Fable-Dzx/FX-991-CNX
+            - 安装包：FX991CNX.apk（debug 签名）
+          files: app/build/outputs/apk/debug/FX991CNX.apk
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
