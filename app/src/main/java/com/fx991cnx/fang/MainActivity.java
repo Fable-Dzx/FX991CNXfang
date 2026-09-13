@@ -14,8 +14,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends Activity {
 
@@ -77,6 +79,27 @@ public class MainActivity extends Activity {
                         try {
                             InputStream is = assets.open(assetPath);
                             String mime = mimeFor(assetPath);
+                            // 对 HTML 注入刘海屏适配样式：覆盖网页自带的 safe-area 顶部留白，
+                            // 让计算器主体真正铺满到刘海区域（网页源码保持不变）
+                            if (mime.startsWith("text/html")) {
+                                byte[] raw = readAll(is);
+                                String html = new String(raw, StandardCharsets.UTF_8);
+                                String style = "<style>"
+                                        + "[class*=\"mainMain\"]{"
+                                        + "padding-top:0 !important;"
+                                        + "padding-bottom:env(safe-area-inset-bottom) !important;"
+                                        + "}"
+                                        + "</style>";
+                                if (html.contains("</head>")) {
+                                    html = html.replace("</head>", style + "</head>");
+                                } else {
+                                    html = style + html;
+                                }
+                                WebResourceResponse resp = new WebResourceResponse(
+                                        mime, "utf-8",
+                                        new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
+                                return resp;
+                            }
                             WebResourceResponse resp = new WebResourceResponse(mime, "utf-8", is);
                             return resp;
                         } catch (IOException e) {
@@ -86,6 +109,17 @@ public class MainActivity extends Activity {
                     }
                 }
                 return null;
+            }
+
+            private byte[] readAll(InputStream is) throws IOException {
+                java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = is.read(buf)) != -1) {
+                    bos.write(buf, 0, n);
+                }
+                is.close();
+                return bos.toByteArray();
             }
         });
 
