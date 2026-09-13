@@ -2,10 +2,10 @@ plugins {
     id 'com.android.application'
 }
 
-def keystorePath = System.getenv("KEYSTORE_PATH")
-def storePass = System.getenv("STORE_PASS")
-def keyPass = System.getenv("KEY_PASS")
-def keyAlias = System.getenv("KEY_ALIAS")
+def ksPath = System.getenv("KEYSTORE_PATH")
+def ksStorePass = System.getenv("STORE_PASS")
+def ksKeyPass = System.getenv("KEY_PASS")
+def ksAlias = System.getenv("KEY_ALIAS")
 
 android {
     namespace 'com.fx991cnx.fang'
@@ -21,11 +21,11 @@ android {
 
     signingConfigs {
         release {
-            if (keystorePath != null && storePass != null && keyPass != null && keyAlias != null) {
-                storeFile file(keystorePath)
-                storePassword storePass
-                keyAlias keyAlias
-                keyPassword keyPass
+            if (ksPath != null && ksStorePass != null && ksKeyPass != null && ksAlias != null) {
+                storeFile file(ksPath)
+                storePassword ksStorePass
+                keyAlias ksAlias
+                keyPassword ksKeyPass
             }
         }
     }
@@ -33,7 +33,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            if (keystorePath != null) {
+            if (ksPath != null) {
                 signingConfig signingConfigs.release
             }
         }
