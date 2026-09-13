@@ -72,6 +72,11 @@ public class MainActivity extends Activity {
                     String path = uri.getPath();
                     if (path != null && path.startsWith("/")) {
                         String assetPath = path.substring(1);
+                        // file:///android_asset/index.html -> getPath()=/android_asset/index.html
+                        // 剥掉 android_asset/ 前缀，assets.open() 才找得到
+                        if (assetPath.startsWith("android_asset/")) {
+                            assetPath = assetPath.substring("android_asset/".length());
+                        }
                         // strip any trailing query / default to index
                         if (assetPath.isEmpty() || assetPath.endsWith("/")) {
                             assetPath = assetPath + "index.html";
@@ -120,6 +125,17 @@ public class MainActivity extends Activity {
                 }
                 is.close();
                 return bos.toByteArray();
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                // 兜底：页面加载后强制清除计算器主容器的 safe-area 顶部留白，
+                // 使内容铺满刘海区域（CSS module 类名含 mainMain 子串）
+                String js = "try{var e=document.querySelector('[class*=\"mainMain\"]');"
+                        + "if(e){e.style.paddingTop='0px';e.style.paddingBottom='env(safe-area-inset-bottom)';}"
+                        + "}catch(err){}";
+                view.evaluateJavascript(js, null);
+                super.onPageFinished(view, url);
             }
         });
 
