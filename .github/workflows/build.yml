@@ -28,18 +28,28 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug --no-daemon --stacktrace --rerun-tasks
+      - name: Decode signing keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > fx991cnx-release.keystore
+          ls -la fx991cnx-release.keystore
+
+      - name: Build release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/fx991cnx-release.keystore
+          STORE_PASS: ${{ secrets.STORE_PASS }}
+          KEY_PASS: ${{ secrets.KEY_PASS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: gradle :app:assembleRelease --no-daemon --stacktrace --rerun-tasks
 
       - name: Rename APK
         run: |
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/FX991CNX.apk
+          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/FX991CNX.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: FX991CNX-apk
-          path: app/build/outputs/apk/debug/FX991CNX.apk
+          path: app/build/outputs/apk/release/FX991CNX.apk
           if-no-files-found: error
 
       - name: Create Release
@@ -51,8 +61,8 @@ jobs:
             自动构建版（来自 commit ${{ github.sha }}）
 
             - 网页源码：https://github.com/Fable-Dzx/FX-991-CNX
-            - 安装包：FX991CNX.apk（debug 签名）
-          files: app/build/outputs/apk/debug/FX991CNX.apk
+            - 安装包：FX991CNX.apk（**Release 签名**，可覆盖更新）
+          files: app/build/outputs/apk/release/FX991CNX.apk
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

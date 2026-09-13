@@ -2,6 +2,11 @@ plugins {
     id 'com.android.application'
 }
 
+def keystorePath = System.getenv("KEYSTORE_PATH")
+def storePass = System.getenv("STORE_PASS")
+def keyPass = System.getenv("KEY_PASS")
+def keyAlias = System.getenv("KEY_ALIAS")
+
 android {
     namespace 'com.fx991cnx.fang'
     compileSdk 34
@@ -10,13 +15,27 @@ android {
         applicationId "com.fx991cnx.fang"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 8
+        versionName "1.0.8"
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePath != null && storePass != null && keyPass != null && keyAlias != null) {
+                storeFile file(keystorePath)
+                storePassword storePass
+                keyAlias keyAlias
+                keyPassword keyPass
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            if (keystorePath != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {
