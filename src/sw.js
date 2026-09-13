@@ -1,6 +1,6 @@
 /* FX-991CN X — 离线可用 service worker（cache-first，仅缓存同源 GET） */
 const CACHE = "fx991cnx-v1";
-const SHELL = "";
+const SHELL = "/";
 
 self.addEventListener("install", (e) => {
     e.waitUntil(
@@ -31,7 +31,7 @@ self.addEventListener("fetch", (e) => {
                 const res = await fetch(req);
                 if (res && res.ok) {
                     const isStatic =
-                        req.url.includes("./next/static/") ||
+                        req.url.includes("/_next/static/") ||
                         req.mode === "navigate";
                     if (isStatic) {
                         cache.put(req, res.clone());
